@@ -29,13 +29,7 @@ This command confirms that:
 - Connection is properly established
 - You can proceed with Blender operations
 
-**If the connection fails:**
-- Verify Blender is running
-- Check that the MCP server is properly configured
-- Restart Blender if necessary
-- Check MCP server logs for connection errors
-
-**Only proceed with other operations after successful connection verification.**
+**If the connection fails**, see [Troubleshooting Guide](references/troubleshooting.md#mcp-connection-issues).
 
 ## User's Blender Configuration
 
@@ -99,16 +93,16 @@ print("Scene configuration verified")
 **AI Generation (text-to-3D or image-to-3D)**
 - Use Hyper3D Rodin for fast generation
 - Use Hunyuan3D for high-quality results
-- See "AI Model Generation" section below
+- **See [AI Generation Guide](references/ai-generation.md) for complete workflow**
 
 **Downloading Existing Models**
 - Use Polyhaven for textures, HDRIs, and high-quality models
 - Use Sketchfab for community models
-- See "Importing Models" section below
+- **See [MCP Tools Reference](references/mcp-tools.md) for tool details**
 
 **Creating from Scratch**
 - Use Python code execution for procedural modeling
-- See "Procedural Modeling" section below
+- See "Procedural Modeling Workflow" below
 
 ### Preparing Models for 3D Printing
 
@@ -124,197 +118,127 @@ print("Scene configuration verified")
 - Intersecting geometry
 - Improper scale
 
+**Need help?** See [Troubleshooting Guide](references/troubleshooting.md)
+
 ## Available MCP Tools
 
-### Scene and Object Information
-```
-mcp__blender__get_scene_info - Get overview of current scene
-mcp__blender__get_object_info - Get details about specific object
-mcp__blender__get_viewport_screenshot - Capture current 3D view
-```
+For complete tool reference including parameters and examples, see [MCP Tools Reference](references/mcp-tools.md).
 
-### Code Execution
-```
-mcp__blender__execute_blender_code - Execute Python code in Blender
-```
-**IMPORTANT**: Break complex operations into smaller steps. Execute code incrementally to avoid errors.
+**Quick overview:**
+- Scene and object information tools
+- Python code execution
+- Polyhaven integration (textures, HDRIs, models)
+- Sketchfab integration (community models)
+- Hyper3D Rodin (AI generation)
+- Hunyuan3D (AI generation)
 
-### Polyhaven Integration
-```
-mcp__blender__get_polyhaven_status - Check if Polyhaven is enabled
-mcp__blender__get_polyhaven_categories - Get asset categories
-mcp__blender__search_polyhaven_assets - Search for assets
-mcp__blender__download_polyhaven_asset - Download and import asset
-mcp__blender__set_texture - Apply texture to object
-```
+## Import and Prepare Existing Model Workflow
 
-### Sketchfab Integration
-```
-mcp__blender__get_sketchfab_status - Check if Sketchfab is enabled
-mcp__blender__search_sketchfab_models - Search for models
-mcp__blender__download_sketchfab_model - Download model by UID
-```
+This is the most common workflow for preparing downloaded or existing models for 3D printing.
 
-### Hyper3D Rodin (AI Generation)
-```
-mcp__blender__get_hyper3d_status - Check status and key type
-mcp__blender__generate_hyper3d_model_via_text - Generate from text prompt
-mcp__blender__generate_hyper3d_model_via_images - Generate from images
-mcp__blender__poll_rodin_job_status - Check generation progress
-mcp__blender__import_generated_asset - Import completed model
+### 1. Import the model
+
+**From Sketchfab/Polyhaven:**
+Use respective download tools (see [MCP Tools Reference](references/mcp-tools.md))
+
+**From file:**
+```python
+import bpy
+
+# Import STL
+bpy.ops.import_mesh.stl(filepath="/path/to/model.stl")
+
+# Import OBJ
+bpy.ops.import_scene.obj(filepath="/path/to/model.obj")
+
+# Import other formats as needed
 ```
 
-### Hunyuan3D (AI Generation)
+### 2. Check the model
+
+```python
+import bpy
+
+# Select object
+obj = bpy.context.active_object
+
+# Check dimensions
+print(f"Dimensions: {obj.dimensions}")
+
+# Check for non-manifold
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_non_manifold()
+# If vertices selected, there are non-manifold elements
 ```
-mcp__blender__get_hunyuan3d_status - Check status and key type
-mcp__blender__generate_hunyuan3d_model - Generate from text/image
-mcp__blender__poll_hunyuan_job_status - Check generation progress
-mcp__blender__import_generated_asset_hunyuan - Import completed model
+
+### 3. Scale to correct size
+
+```python
+# Scale to desired size (use scene's configured units)
+# Check current size first
+print(f"Current dimensions: {obj.dimensions}")
+
+# Set target size in scene units
+target_height = 100.0  # in scene units (check unit settings)
+current_height = obj.dimensions.z
+scale_factor = target_height / current_height
+obj.scale = (scale_factor, scale_factor, scale_factor)
+bpy.ops.object.transform_apply(scale=True)
 ```
 
-## Common 3D Printing Workflows
+### 4. Fix common issues
 
-### Workflow 1: Import and Prepare Existing Model
+```python
+# Enter edit mode
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
 
-1. **Import the model**
-   - From Sketchfab/Polyhaven: Use respective download tools
-   - From file: Use `execute_blender_code` with `bpy.ops.import_mesh.stl()` or similar
+# Recalculate normals
+bpy.ops.mesh.normals_make_consistent(inside=False)
 
-2. **Check the model**
-   ```python
-   import bpy
+# Remove doubles
+bpy.ops.mesh.remove_doubles(threshold=0.0001)
 
-   # Select object
-   obj = bpy.context.active_object
+# Fill holes
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_non_manifold()
+bpy.ops.mesh.edge_face_add()
 
-   # Check dimensions
-   print(f"Dimensions: {obj.dimensions}")
+bpy.ops.object.mode_set(mode='OBJECT')
+```
 
-   # Check for non-manifold
-   bpy.ops.object.mode_set(mode='EDIT')
-   bpy.ops.mesh.select_all(action='DESELECT')
-   bpy.ops.mesh.select_non_manifold()
-   # If vertices selected, there are non-manifold elements
-   ```
+### 5. Run 3D Print Toolbox check (MANDATORY)
 
-3. **Scale to correct size**
-   ```python
-   # Scale to desired size (use scene's configured units)
-   # Check current size first
-   print(f"Current dimensions: {obj.dimensions}")
+```python
+# CRITICAL: Always run 3D Print Toolbox before export
+import bpy
 
-   # Set target size in scene units
-   target_height = 100.0  # in scene units (check unit settings)
-   current_height = obj.dimensions.z
-   scale_factor = target_height / current_height
-   obj.scale = (scale_factor, scale_factor, scale_factor)
-   bpy.ops.object.transform_apply(scale=True)
-   ```
+# Ensure object is selected
+obj = bpy.context.active_object
+obj.select_set(True)
+bpy.context.view_layer.objects.active = obj
 
-4. **Fix common issues**
-   ```python
-   # Enter edit mode
-   bpy.ops.object.mode_set(mode='EDIT')
-   bpy.ops.mesh.select_all(action='SELECT')
+# Run 3D Print check
+bpy.ops.mesh.print3d_check_all()
 
-   # Recalculate normals
-   bpy.ops.mesh.normals_make_consistent(inside=False)
+# Check the results in the 3D Print Toolbox panel
+# Fix any errors before proceeding to export
+```
 
-   # Remove doubles
-   bpy.ops.mesh.remove_doubles(threshold=0.0001)
+### 6. Export for printing (only after passing 3D Print check)
 
-   # Fill holes
-   bpy.ops.mesh.select_all(action='DESELECT')
-   bpy.ops.mesh.select_non_manifold()
-   bpy.ops.mesh.edge_face_add()
+```python
+# Export as STL
+bpy.ops.export_mesh.stl(
+    filepath="/path/to/output.stl",
+    use_selection=True,
+    global_scale=1.0,
+    use_mesh_modifiers=True
+)
+```
 
-   bpy.ops.object.mode_set(mode='OBJECT')
-   ```
-
-5. **Run 3D Print Toolbox check (MANDATORY)**
-   ```python
-   # CRITICAL: Always run 3D Print Toolbox before export
-   import bpy
-
-   # Ensure object is selected
-   obj = bpy.context.active_object
-   obj.select_set(True)
-   bpy.context.view_layer.objects.active = obj
-
-   # Run 3D Print check
-   bpy.ops.mesh.print3d_check_all()
-
-   # Check the results in the 3D Print Toolbox panel
-   # Fix any errors before proceeding to export
-   ```
-
-6. **Export for printing** (only after passing 3D Print check)
-   ```python
-   # Export as STL
-   bpy.ops.export_mesh.stl(
-       filepath="/path/to/output.stl",
-       use_selection=True,
-       global_scale=1.0,
-       use_mesh_modifiers=True
-   )
-   ```
-
-### Workflow 2: AI Generate Model for Printing
-
-**Using Hyper3D Rodin:**
-
-1. **Check status** (remember key type for later use)
-   ```
-   mcp__blender__get_hyper3d_status
-   ```
-
-2. **Generate model**
-   - Text prompt: `mcp__blender__generate_hyper3d_model_via_text`
-   - Image input: `mcp__blender__generate_hyper3d_model_via_images`
-   - Optional: Use `bbox_condition` to control proportions [Length, Width, Height]
-
-3. **Poll for completion**
-   ```
-   mcp__blender__poll_rodin_job_status
-   ```
-   Use `subscription_key` (MAIN_SITE) or `request_id` (FAL_AI) based on key type
-
-4. **Import when complete**
-   ```
-   mcp__blender__import_generated_asset
-   ```
-   Provide object name and `task_uuid` (MAIN_SITE) or `request_id` (FAL_AI)
-
-5. **Prepare for printing** (see Workflow 1, steps 2-6)
-
-**Using Hunyuan3D:**
-
-1. **Check status** (remember key type)
-   ```
-   mcp__blender__get_hunyuan3d_status
-   ```
-
-2. **Generate model**
-   ```
-   mcp__blender__generate_hunyuan3d_model
-   ```
-   Provide `text_prompt` and/or `input_image_url`
-
-3. **Poll for completion**
-   ```
-   mcp__blender__poll_hunyuan_job_status
-   ```
-   Returns status "DONE" when complete, includes `ResultFile3Ds` with ZIP path
-
-4. **Import when complete**
-   ```
-   mcp__blender__import_generated_asset_hunyuan
-   ```
-   Provide object name and `zip_file_url` from poll result
-
-5. **Prepare for printing** (see Workflow 1, steps 2-6)
-
-### Workflow 3: Procedural Modeling for Printing
+## Procedural Modeling Workflow
 
 Create custom parametric models using Python:
 
@@ -382,43 +306,6 @@ This will automatically check for most issues below. **Fix ALL errors** before p
 5. **No Loose Geometry** (checked by 3D Print Toolbox)
    - Remove disconnected vertices/edges
    - Manual fix: `bpy.ops.mesh.delete_loose()`
-
-### Common Issues and Solutions
-
-**Non-Manifold Edges:**
-```python
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.mesh.select_non_manifold()
-# If count > 0: fix by filling holes or removing doubles
-bpy.ops.mesh.remove_doubles(threshold=0.0001)
-```
-
-**Incorrect Scale:**
-```python
-# Check current dimensions (in scene units)
-print(f"Size: {obj.dimensions.x:.1f} x {obj.dimensions.y:.1f} x {obj.dimensions.z:.1f}")
-
-# Scale to specific size (in scene units)
-obj.dimensions = (50, 50, 100)  # Example: 50 x 50 x 100 in scene units
-bpy.ops.object.transform_apply(scale=True)
-```
-
-**Flipped Normals:**
-```python
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.mesh.normals_make_consistent(inside=False)
-bpy.ops.object.mode_set(mode='OBJECT')
-```
-
-**Too Many Polygons:**
-```python
-# Add Decimate modifier
-mod = obj.modifiers.new(name="Decimate", type='DECIMATE')
-mod.ratio = 0.5  # Reduce to 50% of original poly count
-bpy.ops.object.modifier_apply(modifier="Decimate")
-```
 
 ### Using the 3D Print Toolbox
 
@@ -515,58 +402,6 @@ Step 5: Fix next issue (e.g., fill holes)
 
 **DON'T** try to do everything in one large script. **DO** break it into digestible chunks.
 
-## AI Model Generation Notes
-
-### Hyper3D Rodin
-- **Modes**: MAIN_SITE or FAL_AI (determined by key type)
-- **Text prompts**: Must be in English, short descriptions work best
-- **Image input**:
-  - MAIN_SITE: Provide absolute file paths
-  - FAL_AI: Provide URLs to images
-- **bbox_condition**: Controls model proportions [L, W, H], e.g., [1.0, 1.0, 2.0] for tall model
-- **Generated models**: Normalized size, requires rescaling for printing
-
-### Hunyuan3D
-- Supports both text and image input
-- Can use both simultaneously for better results
-- Accepts Chinese and English prompts
-- Local or remote image URLs supported
-- Returns OBJ format in ZIP file
-
-### Post-Generation Workflow
-1. Generate model (returns job ID)
-2. Poll status until "DONE" or "COMPLETED"
-3. Import the generated asset
-4. **Always rescale** - AI models are normalized
-5. **Always check manifoldness** - AI may generate non-printable geometry
-6. Apply fixes as needed
-7. Export for printing
-
-## Troubleshooting
-
-### "Non-manifold geometry detected"
-- Select non-manifold: `bpy.ops.mesh.select_non_manifold()`
-- Remove doubles with tight threshold
-- Fill holes manually or with `edge_face_add()`
-- Check for intersecting faces
-
-### "Model is too small/large"
-- Check dimensions: `obj.dimensions`
-- Apply scale: Set `obj.dimensions` or use `obj.scale`
-- Apply transformation: `bpy.ops.object.transform_apply(scale=True)`
-
-### "Generation failed"
-- Check API status first
-- Verify prompt is in correct language (English for most)
-- For image input, ensure paths/URLs are accessible
-- Check polling interval (don't poll too frequently)
-
-### "Export failed"
-- Ensure object is selected
-- Apply all modifiers before export
-- Check file path is valid and writable
-- Verify export format supports mesh type
-
 ## Quick Reference: Complete Print-Ready Pipeline
 
 ```python
@@ -620,3 +455,9 @@ bpy.ops.export_mesh.stl(
 - **AI models need work**: Generated models always need preparation and scaling
 - **Use global_scale=1.0**: Let Blender's scene units control export scaling
 - **Test prints**: Start small to validate model integrity
+
+## Additional Resources
+
+- **[MCP Tools Reference](references/mcp-tools.md)** - Complete reference for all Blender MCP tools
+- **[AI Generation Guide](references/ai-generation.md)** - Detailed workflows for Hyper3D Rodin and Hunyuan3D
+- **[Troubleshooting Guide](references/troubleshooting.md)** - Solutions for common issues

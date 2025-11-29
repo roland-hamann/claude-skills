@@ -220,6 +220,11 @@ bpy.ops.mesh.normals_make_consistent(inside=False)
 # Remove doubles
 bpy.ops.mesh.remove_doubles(threshold=0.0001)
 
+# Remove internal faces (critical for slicers)
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_interior_faces()
+bpy.ops.mesh.delete(type='FACE')
+
 # Fill holes
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.mesh.select_non_manifold()
@@ -439,6 +444,10 @@ bpy.ops.mesh.select_all(action='SELECT')
 # 4. Clean geometry
 bpy.ops.mesh.remove_doubles(threshold=0.0001)
 bpy.ops.mesh.delete_loose()
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_interior_faces()
+bpy.ops.mesh.delete(type='FACE')  # Remove internal faces
+bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.mesh.fill_holes()
 
 # 5. Fix normals
@@ -469,6 +478,8 @@ bpy.ops.export_mesh.stl(
 
 - **Search online first**: Always check existing 3D print files before creating - saves hours of work
 - **Always check scene unit settings first**: Respect the configured default profile
+- **Remove internal faces**: Critical for slicers - internal faces confuse boundary detection
+- **Apply all modifiers**: Before any mesh operations or export
 - **ALWAYS run 3D Print Toolbox check**: Never export without running `bpy.ops.mesh.print3d_check_all()` first
 - **Use screenshots**: Visual feedback prevents errors
 - **Execute incrementally**: Small steps, validate each one

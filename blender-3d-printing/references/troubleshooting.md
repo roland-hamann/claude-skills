@@ -131,6 +131,41 @@ for mod in obj.modifiers:
 - Fix all reported errors
 - Re-run check after fixes
 
+## Slicer Shows Errors or Weird Geometry
+
+**Problem**: Slicer software shows errors, missing layers, or unexpected geometry even though the model looks fine in Blender.
+
+**Common cause**: Internal faces confuse the slicer about what's inside vs. outside the model.
+
+**Solutions**:
+
+1. **Remove internal faces**:
+```python
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_interior_faces()
+bpy.ops.mesh.delete(type='FACE')
+bpy.ops.object.mode_set(mode='OBJECT')
+```
+
+2. **Check for intersecting geometry**:
+- Run 3D Print Toolbox check
+- Look for "Intersections" warnings
+- Separate or merge intersecting parts
+
+3. **Verify the model after removing internal faces**:
+```python
+# Re-check with 3D Print Toolbox
+bpy.ops.mesh.print3d_check_all()
+```
+
+4. **Re-export and test in slicer**:
+- Export fresh STL after cleanup
+- Verify in slicer preview
+- Check layer view for anomalies
+
+**Why this matters**: Internal faces don't affect how the model looks in Blender, but slicers need to understand the interior vs. exterior boundary. Internal faces break this understanding, causing print failures.
+
 ## Flipped or Incorrect Normals
 
 **Problem**: Model appears inside-out or has rendering issues.

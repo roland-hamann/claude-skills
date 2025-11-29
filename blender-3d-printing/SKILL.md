@@ -88,14 +88,34 @@ print("Scene configuration verified")
 
 ## Workflow Decision Tree
 
-### Getting Models into Blender
+### FIRST: Search for Existing 3D Print Files
+
+**ALWAYS check online repositories before creating or generating models.**
+
+Most models already exist, are print-tested, and free to use. Search can save hours of work.
+
+**See [Online Sources Guide](references/online-sources.md) for:**
+- Complete list of free and paid repositories
+- Search strategies and quality evaluation
+- How to present findings categorized by free vs. paid
+- When to use existing vs. create new
+
+**Quick search process:**
+1. Extract key search terms from user's description
+2. Search top free repositories (Printables, Thingiverse, MyMiniFactory)
+3. Evaluate results for quality and print-readiness
+4. Search paid repositories if free options insufficient
+5. Present findings in two categories: **Free** and **Paid**
+6. Let user decide: use existing or proceed with creation
+
+### If No Suitable Existing Files Found
 
 **AI Generation (text-to-3D or image-to-3D)**
 - Use Hyper3D Rodin for fast generation
 - Use Hunyuan3D for high-quality results
 - **See [AI Generation Guide](references/ai-generation.md) for complete workflow**
 
-**Downloading Existing Models**
+**Downloading from Asset Libraries**
 - Use Polyhaven for textures, HDRIs, and high-quality models
 - Use Sketchfab for community models
 - **See [MCP Tools Reference](references/mcp-tools.md) for tool details**
@@ -447,6 +467,7 @@ bpy.ops.export_mesh.stl(
 
 ## Remember
 
+- **Search online first**: Always check existing 3D print files before creating - saves hours of work
 - **Always check scene unit settings first**: Respect the configured default profile
 - **ALWAYS run 3D Print Toolbox check**: Never export without running `bpy.ops.mesh.print3d_check_all()` first
 - **Use screenshots**: Visual feedback prevents errors
@@ -458,6 +479,7 @@ bpy.ops.export_mesh.stl(
 
 ## Additional Resources
 
+- **[Online Sources Guide](references/online-sources.md)** - Search strategies for free and paid 3D print file repositories
 - **[MCP Tools Reference](references/mcp-tools.md)** - Complete reference for all Blender MCP tools
 - **[AI Generation Guide](references/ai-generation.md)** - Detailed workflows for Hyper3D Rodin and Hunyuan3D
 - **[Troubleshooting Guide](references/troubleshooting.md)** - Solutions for common issues

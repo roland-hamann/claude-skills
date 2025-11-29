@@ -13,6 +13,14 @@ Before creating or generating a 3D model from scratch, search existing repositor
 
 ## Free 3D Print File Repositories
 
+### MakerWorld (by Bambu Lab)
+- **URL**: https://makerworld.com/en/3d-models
+- **Focus**: Optimized for Bambu Lab printers, community-driven
+- **Strengths**: Tight integration with Bambu printers, points/rewards system, rapidly growing library, optimized print profiles
+- **License**: Various (check per model)
+- **Search tip**: Filter by "Popular" or "Newest", check "Verified Designer" badge
+- **Note**: Best choice for Bambu Lab printer users - models often include optimized profiles
+
 ### Printables (by Prusa)
 - **URL**: https://www.printables.com
 - **Focus**: High-quality, community-tested prints
@@ -105,7 +113,8 @@ Extract key terms from user's request:
 ### 2. Systematic Search Process
 
 **Step 1: Quick scan of free repositories**
-Search top 3 free sites (Printables, Thingiverse, MyMiniFactory) with primary keywords
+Search top 3-4 free sites (MakerWorld, Printables, Thingiverse, MyMiniFactory) with primary keywords
+- **Start with MakerWorld** if user has Bambu Lab printer
 
 **Step 2: Evaluate top results**
 For each promising result, check:
@@ -238,12 +247,13 @@ Always verify license before using, especially for commercial purposes.
 **User request**: "I need a decorative vase for my desk"
 
 **Search process**:
-1. Search Printables for "decorative vase"
-2. Search Thingiverse for "desk vase small"
-3. Search MyMiniFactory for "modern vase"
-4. Filter results by quality indicators
-5. Select top 3-5 options
-6. Check if any paid options significantly better
+1. Search MakerWorld for "decorative vase" (user has Bambu Lab printer)
+2. Search Printables for "decorative vase"
+3. Search Thingiverse for "desk vase small"
+4. Search MyMiniFactory for "modern vase"
+5. Filter results by quality indicators
+6. Select top 3-5 options
+7. Check if any paid options significantly better
 
 **Present findings**:
 - 3 free options with quality assessment

@@ -102,7 +102,7 @@ Most models already exist, are print-tested, and free to use. Search can save ho
 
 **Quick search process:**
 1. Extract key search terms from user's description
-2. Search top free repositories (Printables, Thingiverse, MyMiniFactory)
+2. Search top free repositories (MakerWorld, Printables, Thingiverse, MyMiniFactory)
 3. Evaluate results for quality and print-readiness
 4. Search paid repositories if free options insufficient
 5. Present findings in two categories: **Free** and **Paid**
